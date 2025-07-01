@@ -1,0 +1,289 @@
+🧠 TryHackMe: Pyramid of Pain — Walkthrough & Analysis
+“Learn the Pyramid of Pain model to understand how hard it is for attackers to change their indicators — and how defenders can use this to hurt adversaries most.”
+________________________________________
+🔍 Room Overview
+•	Room Name: Pyramid of Pain
+•	Difficulty: 🟢 Easy
+•	Estimated Time: 30 minutes
+•	Category: Threat Intelligence / Defensive Security
+•	Tags: CTI, Threat Hunting, SOC, Indicators of Compromise
+________________________________________
+📘 Introduction
+The Pyramid of Pain is a powerful model created by David J. Bianco to help threat hunters, CTI analysts, and SOC analysts understand how effective different types of indicators are in disrupting adversary operations.
+It's been implemented by top vendors like:
+•	Cisco Security
+•	SentinelOne
+•	SOCRadar
+In this room, you’ll go layer by layer through the pyramid, starting from basic (hashes) to complex (TTPs), and learn what causes real pain to attackers.
+ ________________________________________
+🧱 The Layers of the Pyramid of Pain
+Indicator Type	Difficulty for Adversary	Defender Usefulness
+Hash Values	Trivial	Low (easily changed)
+IP Addresses	Easy	Short-lived value
+Domain Names	Simple	Easily replaced
+Host Artifacts	Annoying	More unique
+Network Artifacts	Annoying	Tied to behaviors
+Tools	Challenging	Requires retooling
+TTPs	Tough	Alters campaign base
+________________________________________
+🧠 Task 1: Introduction
+This task gives you background about how this model is used in threat intelligence tools and IR.
+No question to answer — just read and join the room.
+________________________________________
+🧩 Task 2: Hash Values (Trivial)
+Hash values are unique digital fingerprints generated using algorithms like MD5, SHA-1, and SHA-256. These are commonly used by cybersecurity professionals to identify files, especially malware or suspicious samples.
+However, attackers can trivially bypass hash-based detection — even a tiny modification to a file (like appending a string) changes its hash entirely. That’s why hashes are the least effective IOC on the Pyramid of Pain — they’re easy for adversaries to change.
+In this task, we’re introduced to tools like VirusTotal and MetaDefender Cloud (OPSWAT) for hash lookups, showing how a hash can be used to identify malware samples. We also see a PowerShell example demonstrating how easily a hash can be changed.
+🔍 Task 2 — Question:
+Analyze the report associated with the hash
+b8ef959a9176aef07fdca8705254a163b50b49a17217a4ff0107487f59d4a35d here
+What is the filename of the sample?
+To solve this:
+1.	Click on the here word in question 
+2.	A pdf file will open below hash the name is given
+✅ Answer: Sales_Receipt 5606.xls
+ 
+________________________________________
+🌐 Task 3: IP Address (Easy)
+IP Addresses play a crucial role in how devices communicate across a network. In cybersecurity, IP addresses can be used as indicators of compromise (IOCs) to detect or block malicious activity. However, in the Pyramid of Pain, IP addresses are considered easy for an attacker to change — they’re placed just above hashes.
+Blocking IPs may stop known malicious traffic temporarily, but experienced adversaries can quickly switch to new IPs or use Fast Flux techniques to rotate between them, making defenses based solely on IPs unreliable.
+
+🔎 Fast Flux Overview
+Fast Flux is a technique where multiple IP addresses are rapidly associated with a single domain name. Attackers use it to:
+•	Hide malware infrastructure
+•	Bypass IP blacklists
+•	Ensure high availability of C2 servers
+Because of this agility, relying solely on IPs for detection and mitigation is not very effective in long-term defense strategies.
+
+📘 Report Analysis Instructions
+To answer the questions:
+1.	Open the provided any.run report link (in the task).
+2.	Look for Process ID (PID 1632) in the network activity logs.
+3.	Find the first IP address and domain name that the process tries to reach.
+
+✅ Question 1:
+What is the first IP address the malicious process (PID 1632) attempts to communicate with?
+Answer:  50.87.136.52
+
+
+✅ Question 2:
+What is the first domain name the malicious process (PID 1632) attempts to communicate with?
+Answer: craftingalegacy.com
+
+
+ ________________________________________
+🌐 Task 4: Domain Names (Simple)
+As we move further up the Pyramid of Pain, we now explore Domain Names — which are more difficult for attackers to change compared to hashes or IP addresses. They are marked with a teal color in the pyramid, indicating that disrupting them causes moderate pain for adversaries.
+💡 What Are Domain Names?
+A domain name is a human-readable string that maps to an IP address (e.g., evilcorp.com). Domains can have:
+•	Top-Level Domain (TLD) like .com, .org
+•	Second-Level Domain (SLD) like evilcorp
+•	Subdomains like admin.evilcorp.com
+Attackers often register domains to use for:
+•	Malware distribution
+•	Phishing
+•	Command & Control (C2) servers
+Although changing a domain is harder than switching IPs, many DNS providers make it easier for attackers by allowing automated changes through APIs or offering cheap anonymous registration.
+
+🧠 Punycode Attacks
+A Punycode attack leverages Unicode characters in domain names to make fake domains look like real ones.
+🔍 Example:
+•	Fake: adıdas.de
+•	Real: adidas.de
+•	Punycode: xn--addas-o4a.de
+Browsers now try to warn or convert such domains, but it's still a common phishing technique.
+
+🔗 Shortened URLs
+Attackers also use URL shorteners like:
+•	bit.ly
+•	tinyurl.com
+•	s.id
+To preview where a shortened link leads, add a + at the end:
+https://tinyurl.com/bw7t8p4u+
+This reveals the true destination without clicking.
+
+🧪 Analysis via Any.run Sandbox
+To uncover malicious domains in malware:
+1.	Open the Any.run sandbox report (linked in the task).
+2.	Navigate to the DNS Requests, HTTP Requests, or Connections tab.
+3.	Look for the first suspicious domain the sample tries to contact
+
+✅ Answers
+Question 1:
+Go to this report on app.any.run and provide the first suspicious domain request you are seeing 
+Answer: craftingalegacy.com
+ 
+
+Question 2:
+What term refers to an address used to access websites?
+Answer: Domain Name
+
+Question 3:
+What type of attack uses Unicode characters in the domain name to imitate a known domain?
+Answer: Punycode attack
+
+Question 4:
+Provide the redirected website for the shortened URL using a preview: https://tinyurl.com/bw7t8p4u
+Answer: https://tryhackme.com/ (just put ‘+’ at the end of the link and you will see the below page)
+ 
+________________________________________
+🖥️ Task 5: Host Artifacts (Annoying)
+As we climb higher into the yellow zone of the Pyramid of Pain, we reach a detection level that is significantly more frustrating for attackers. Unlike simple indicators like IPs or hashes, host artifacts relate to specific behaviors and changes on the system caused by the attacker. Detecting these often forces attackers to recompile malware, change delivery mechanisms, or rewrite entire scripts — a resource-draining process.
+💡 What Are Host Artifacts?
+Host artifacts are traces left by malicious activity on an endpoint. These include:
+•	Suspicious processes (e.g., PowerShell, regedit, Office spawning CMD)
+•	Registry modifications
+•	Dropped malicious files or payloads
+•	Unusual service creation or scheduled tasks
+•	Known filenames associated with malware
+These artifacts provide defenders with deeper insights, often allowing them to trace the full scope of compromise beyond just blocking indicators.
+🔍 Example Behavior Observed in the Sandbox
+In the sandbox analysis, a process (regidle.exe) is seen making a POST request to a U.S.-based IP on port 8080. This kind of communication is typically associated with Command & Control (C2) activity.
+🧪 Malware Dropped
+The actor drops a malicious file named G_jugk.exe, which appears to execute post-exploitation tasks and maintain persistence.
+🛡️ VirusTotal Analysis
+When analyzed on VirusTotal, the file was flagged by 9 different vendors as malicious — reinforcing its threat level.
+
+✅ Answers
+Question 1:
+A process named regidle.exe makes a POST request to an IP address based in the United States (US) on port 8080. What is the IP address?
+Answer: 96.126.101.6
+ 
+Question 2:
+The actor drops a malicious executable (EXE). What is the name of this executable?
+Answer: G_jugk.exe
+ 
+Question 3:
+Look at this report by VirusTotal. How many vendors determine this host to be malicious?
+Answer: 9
+ 
+________________________________________
+🌐 Task 6: Network Artifacts (Annoying)
+In the yellow zone of the Pyramid of Pain, we encounter Network Artifacts — subtle yet critical traces of adversarial activity that occur over the network. These indicators are more challenging for attackers to change compared to IPs or hashes, as they often reflect built-in behaviors of their tools or malware infrastructure.
+💡 What Are Network Artifacts?
+Network artifacts include elements such as:
+•	User-Agent strings (which identify software making HTTP requests)
+•	C2 server URIs (used for exfiltration or malware communication)
+•	Protocol anomalies
+•	Suspicious DNS queries or HTTP POST patterns
+🕵️‍♂️ Why Do They Matter?
+If a User-Agent string is suspicious or uncommon in your environment (e.g., Microsoft Office 2017 initiating HTTP connections), it can be an excellent detection point. For instance, malware like Emotet is known to use User-Agent strings that mimic outdated browsers or office tools to blend in.
+📡 Detecting with TShark
+Using packet captures (PCAPs), we can identify HTTP request metadata, like user agents and hosts, using the following TShark command:
+tshark -Y http.request -T fields -e http.host -e http.user_agent -r analysis_file.pcap
+This reveals all user-agent strings found in a network capture, helping SOC analysts trace or block specific behaviors.
+🧪 Example Observation
+In this task, the User-Agent string is:
+Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko
+This is associated with Internet Explorer 11 — a now legacy browser, often spoofed by malware to evade detection.
+
+✅ Answers
+Question 1:
+What browser uses the User-Agent string shown in the screenshot above?
+Answer: Internet Explorer
+ 
+
+Question 2:
+How many POST requests are in the screenshot from the pcap file?
+Answer: 6
+ 
+________________________________________
+⚔️ Task 7: Tools (Challenging)
+Congratulations! We've now reached the orange zone of the Pyramid of Pain — the point where the attacker is truly frustrated.
+🧠 What Are “Tools” in the Pyramid of Pain?
+At this level, defenders detect or block the specific tools adversaries use — like:
+•	🧬 Custom EXEs and DLLs
+•	🪝 Malicious payload generators
+•	📄 Maldoc droppers used in phishing (e.g., Stealer.exe)
+•	🧪 Password crackers or C2 frameworks (e.g., Empire, Cobalt Strike)
+If you catch these, attackers might need to:
+•	Rebuild their toolkit
+•	Recompile their malware
+•	Abandon the attack entirely
+That’s what makes this painful for the attacker.
+
+🔍 Detection Techniques
+At this stage, defenders use advanced threat hunting techniques like:
+Technique	Description
+🔬 YARA Rules	Used to classify & identify malware samples by patterns in binary files
+🧪 AV Signatures	Static detection of known malware patterns by antivirus software
+🔁 Fuzzy Hashing	Detects similarities between files (even with minor changes)
+📘 Detection Rules	Shared by SOC Prime for CVEs, APTs, C2s and more
+🧊 SSDeep	A common fuzzy hashing algorithm (used in VirusTotal, Malshare, etc.)
+
+🧰 Recommended Tools & Resources
+•	MalwareBazaar – Public malware sample repo with YARA and fuzzy hashes
+•	Malshare – Open source malware repository
+•	SOC Prime – Community-driven detection rule marketplace
+•	SSDeep – Fuzzy hashing tool for similarity detection
+
+✅ Answers
+Question 1: Provide the method used to determine similarity between the files
+Answer: Fuzzy hashing
+
+Question 2: Provide the alternative name for fuzzy hashes without the abbreviation
+Answer: Context Triggered Piecewise Hashing
+ 
+________________________________________
+
+🧠 Task 8: TTPs (Tough)
+Welcome to the final stage of the Pyramid of Pain — the tip of the spear 🔺.
+At this level, you’re targeting Tactics, Techniques, and Procedures (TTPs) — the core behaviors of adversaries. This includes their:
+•	🧭 Tactics: Why they're doing something (e.g., Initial Access, Lateral Movement)
+•	🛠 Techniques: How they're doing it (e.g., Pass-the-Hash, Phishing)
+•	🔁 Procedures: The exact methods, scripts, or tools used (e.g., mimikatz, Empire, custom macros)
+________________________________________
+🔐 MITRE ATT&CK Framework
+The entire MITRE ATT&CK Matrix is based on understanding TTPs across multiple platforms like:
+•	Windows
+•	Linux
+•	macOS
+•	Cloud
+•	Containers
+•	Mobile
+Detecting TTPs means you’re watching the behavior, not just indicators like IPs or hashes — making it the hardest for attackers to bypass.
+________________________________________
+💥 Real-World Impact
+If your SOC can catch an adversary performing:
+•	Lateral movement with Pass-the-Hash
+•	Persistence via Scheduled Tasks
+•	Exfiltration through DNS Tunneling
+...you’ve likely detected them early in the attack chain, before critical damage.
+Once this happens, the attacker is faced with two choices:
+1.	🔁 Rebuild their entire workflow/toolkit
+2.	❌ Abandon the target
+
+✅ Answers
+Question 1: Navigate to ATT&CK Matrix webpage. How many techniques fall under the Exfiltration category?
+Answer: 9
+(You can verify at: https://attack.mitre.org/tactics/TA0010/)
+ 
+
+Question 2: Chimera is a China-based hacking group that has been active since 2018. What is the name of the commercial, remote access tool they use for C2 beacons and data exfiltration?
+Answer: Cobalt Strike
+ 
+________________________________________
+
+🧪 Task 9: Practical — The Pyramid of Pain
+In this practical challenge, you'll apply everything you've learned in the Pyramid of Pain room by dragging and dropping Indicators of Compromise (IOCs) into the correct levels of the pyramid using a static site.
+
+🖥️ How to Complete:
+1.	Click the "View Site" button inside Task 9 on TryHackMe.
+2.	You’ll see several IOCs (like IPs, Hashes, Tools, TTPs, etc.)
+3.	Drag and drop each indicator into the correct tier of the Pyramid of Pain.
+o	Use what you've learned from earlier tasks to guide you.
+4.	When you're done, click the Submit button on the static site.
+5.	If correct, you will receive a flag.
+
+•  The attacker has utilised these to accomplish their objective. → TTP
+•  The attackers plans and objectives. → Tools
+•  These signatures can be used to attribute payloads and artefacts to an actor. → Hash values
+•  An attacker has purchased this and used it in a typo-squatting campaign. → Domain Names
+•  These addresses can be used to identify the infrastructure an attacker is using for their campaign. → IP addresses
+•  These artefacts can present themselves as C2 traffic for example. → Network
+
+
+✅ Answer
+What is the flag?
+THM{PYRAMIDS_COMPLETE}
+
